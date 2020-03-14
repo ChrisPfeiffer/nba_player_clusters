@@ -2,3 +2,7 @@ streamlit
 matplotlib
 seaborn
 altair
+pandas
+numpy
+os
+sklearn
