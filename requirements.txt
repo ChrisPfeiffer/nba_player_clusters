@@ -4,5 +4,4 @@ seaborn
 altair
 pandas
 numpy
-os
 sklearn
