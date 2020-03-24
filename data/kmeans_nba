@@ -1,0 +1,71 @@
+1) Unsupervised machine learning
+2) KMeans Clustering
+3) First run
+4) Second run
+5) Details/Benn
+
+
+
+Unsupervised Machine Learning - Is Ben Simmons Really a Guard?
+
+When I first heard the phrase unsupervised learning, I thought it was referring to those days in high school when you had a substitute teacher in their early 20's. It turns out that in Data Science and Machine Learning, it means something else.
+
+Supervised Learning techniques are used when you know what you are trying to predict, and you have examples you can use to train a model. For example, does this picture contain a dog (classification)? What will Apple's stock price be tomorrow (regression)? 
+
+In unsupervised learning, the goal is to look for patterns that exist in the data, such as groups that naturally form based on certain attributes. Understanding these groups can be actionable in a lot of different ways. For example, you can look for clusters that emerge from quantifiable customer behavior data to better understand what groups of customers exist and how you can better serve and communicate with each.
+
+The Unsupervised Learning technique that I chose to use to look at NBA data is K-Means Clustering. The algorithm used by K-Means clustering is actually pretty easy to understand intuitively:
+
+Step 1 - Choose the number of Clusters (N) you want
+Step 2 - Randomly initialize N Centroids
+Step 3 - Loop through all of your rows of data and assign each row to its closest Centroid.
+Step 4 - Adjust the centroids to equal the mean of all the rows that were assigned to them.
+
+Steps 3 and 4 are repeated until either rows are no longer being re-assigned or a threshold for how many iterations to run is met. You are left with N groups and can then examine which rows wound up in which groups.
+
+In the modern NBA, positions are becoming murky and I thought it would be interesting to feed a model metrics for each player that describes their playing style to see which natural groups emerge, and name them.
+
+All data used in this project and descriptions of the data come from CleaningTheGlass.com - a great site for NBA data nerds to check out.
+
+I started out using only two metrics. I did this to make it easy to visualize what is going on and I wanted to make sure my approach was correct. The two metrics I chose were Assist Percentage - The percentage of a player's teammates made shots he assisted on (per CleaningTheGlass.com) and Defensive Field Goal Rebounding Percentage - the percentage of his opponent's field goals that the player rebounded. I also isolated the players to contain only Points and Bigs. I figured this would help to create contrast and allow for clearer clusters to emerge.
+
+Here is a plot of the stats I chose with positions represented by color:
+
+For this simplified example with only two input features, I chose to only use 2 clusters. Not surprisingly, the model, without being fed any information about positions, came up with two clusters that separeted the players almost exactly by position. Cluster 0 was almost entirely Bigs and Cluster 1 was almost entirely Points:
+
+Cluster 0 Had an Average Assist Rate of 9.71% and an average Defensive Rebound Rate of 17.9 while Cluster 1 had an average assist rate of 29.36% and an average Defensive Rebound Rate of 11.9
+
+I found it really interesting to inspect which Points made it into Cluster 1 and which Bigs made it into Cluster 0
+
+Points in Cluster 1 :
+
+Bigs in Cluster 2:
+
+I haven't watched much Cavs this year, but what is Collin Sexton doing with an assist rate that low!? The rest are unsurprising - some bigs who are great passers made their way into the group that contains mostly points, Patrick Beverley is a scrappy rebounder who doesn't get many assists, and no one actually knows who Frank Jackson is.
+
+This round of K-Means clustering left me feeling a bit more bold. Time to incorporate more stats and do another run on a larger set of players, and see what groups emerge.
+
+I specifically chose stats that are normalized to minutes. For example, USAGE% describes the behavior when on the court, where as points per game, or points this season can vary drastically. I wanted to quantify WHAT they are doing on the floor, not how much playing time they are getting. I wound up choosing the following metrics that I categorized into buckets:
+
+Offensive Impact
+
+Usage
+Assist Percent
+Points Per Shot Attempt
+Free Throw Percentage
+Shooting Foul Percentage (% of shots they are fouled on)
+
+Shot Types
+% of shots at rim
+% of shots at mid-range
+% of shots from three
+
+Defensive Impact
+Block Percentage
+Steal Percentage
+
+Rebounding
+Offensive FG Rebound Percentage
+Defensive FG Rebound Percentage
+
+
