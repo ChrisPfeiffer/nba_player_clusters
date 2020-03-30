@@ -8,7 +8,6 @@ import os
 from os import path
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
-from vega_datasets import data
 
 @st.cache
 def get_dataset(filename):
@@ -47,7 +46,7 @@ st.write('For the simplified demo of clustering, I limited the data to Points an
 st.write(off_and_def.head(5))
 
 chart = alt.Chart(off_and_def).mark_circle().encode(x='AST_pct', y='fg_DR_pct', color='Pos_x', text='Player', tooltip=['Player'])
-st.write('A scatter plot of the joined and filtered data')
+st.write('A scatter plot of the joined and filtered data. Hover over a dot to see who it is.')
 st.altair_chart(chart)
 
 st.write('Now I will perform K Means Clustering with two clusters.')
@@ -141,7 +140,7 @@ st.write(kmeans_data[kmeans_data.clusters == 2].groupby('Pos').count()['Player']
 
 'It is interesting to me that the group with the lowest usage rate (1), took the most threes. In the modern NBA, so many players have a permission slip the let the three fly.'
 'The Traditional Bigs Cluster has the least amount of players by far. This dwindling group of non-three-shooting bigs has managed to avoid extinction with insanely good points per shot attempt'
-'Ben Simmons shot profile looks like that of a mid-90s center, not a modern guard'
+'The Ben Simmons shot profile looks like that of a mid-90s center, not a modern guard'
 
 '## Same Analysis - Different Era'
 
@@ -193,7 +192,7 @@ st.write(kmeans_data03[kmeans_data03.clusters==1])
 st.write(kmeans_data03[kmeans_data03.clusters==1].groupby('Pos').count()['Player'])
 
 '### Cluster 2 - Bigs who love the mid-range'
-'Cluster 2 has the second highest reboudning numbers, barely shoots any threes, and shoots more midranges than any group from either era.'
+'Cluster 2 has the second highest rebounding numbers, barely shoots any threes, and shoots more midranges than any group from either era.'
 'Close your eyes and picture Kevin Garnett pulling up from the elbow - that is this group'
 'Most of these guys would be shooting threes as stretch fours or fives in todays game'
 st.write(kmeans_data03[kmeans_data03.clusters==2])
