@@ -50,7 +50,7 @@ st.write('A scatter plot of the joined and filtered data. Hover over a dot to se
 st.altair_chart(chart)
 
 st.write('Now I will perform K Means Clustering with two clusters.')
-kmeans = KMeans(n_clusters=2, random_state=0).fit(off_and_def[['AST_pct', 'fg_DR_pct']])
+kmeans = KMeans(n_clusters=2, random_state=32).fit(off_and_def[['AST_pct', 'fg_DR_pct']])
 clusters = kmeans.predict(off_and_def[['AST_pct', 'fg_DR_pct']])
 off_and_def['cluster'] = clusters
 
@@ -106,7 +106,7 @@ training_values = kmeans_data.drop(['Player', 'Team', 'Pos', 'Min'], axis=1)
 min_max_scaler = preprocessing.MinMaxScaler()
 scaled_values = pd.DataFrame(min_max_scaler.fit_transform(training_values))
 
-kmeans = KMeans(n_clusters=4, random_state=0).fit(scaled_values)
+kmeans = KMeans(n_clusters=4, random_state=32).fit(scaled_values)
 clusters = kmeans.predict(scaled_values)
 kmeans_data['clusters'] = clusters
 
@@ -173,7 +173,7 @@ training_values03 = kmeans_data03.drop(['Player', 'Team', 'Pos', 'Min'], axis=1)
 min_max_scaler03 = preprocessing.MinMaxScaler()
 scaled_values03 = pd.DataFrame(min_max_scaler.fit_transform(training_values03))
 
-kmeans03 = KMeans(n_clusters=4, random_state=0).fit(scaled_values03)
+kmeans03 = KMeans(n_clusters=4, random_state=32).fit(scaled_values03)
 clusters03 = kmeans03.predict(scaled_values03)
 kmeans_data03['clusters'] = clusters03
 'Note: Cleaning the glass did not have Shooting foul percent so I removed that from 03-04 clusters'
