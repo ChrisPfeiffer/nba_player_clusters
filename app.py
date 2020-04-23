@@ -19,6 +19,17 @@ def get_dataset(filename):
         
     return dataset
 
+'# Finding Groups of NBA Players using K-Means Clustering'
+
+(
+    'The goal of this analysis is to use unsupervised machine learning, specifically K-Means Clustering to see'
+    ' which groups of players naturally emerge and what their characteristics are. We will start off very simply by'
+    ' splitting a group of only bigs and points into two groups using two data features. This allows us to easily visualize'
+    ' how k-means clustering works. After that, we will use many more features to come up with 4 clusters of NBA players and inspect'
+    ' the players and characteristics of each cluster. Finally, we will see clusters with completely different characteristics emerge'
+    ' when we perform the same analysis on players from the 2003-2004 season.'
+)
+
 '## Importing the raw data'
 off_overview = get_dataset("offensive_overview.csv")
 off_columns = ['Player', 'Age', 'Team', 'Pos', 'Min', "Usage_rank", 'Usage', 'PSA_rank', 'PSA', 'AST_pct_rank', 'AST_pct', 'AST_usage_rank', 'AST_usg', 'TOV_pct_rank', 'TOV_pct']
@@ -42,19 +53,24 @@ def_reb_bigs_points = def_reb[def_reb.Pos.isin(["Big", "Point"])]
 
 off_and_def = off_bigs_points.merge(def_reb_bigs_points, on='Player')[['Player', 'AST_pct', 'fg_DR_pct', 'Min_x', 'Pos_x']]
 off_and_def = off_and_def[off_and_def.Min_x > 480]
-st.write('For the simplified demo of clustering, I limited the data to Points and Bigs. Here is a sample of the joined and filtered data:')
+(
+    'For the simplified demo of clustering, I limited the data to Points and Bigs. I am using only Assist Percentage and Defensive Rebound Percentage.'
+    ' Those two features should create contrast between the points and bigs. Sample of joined and filtered data:'
+)
 st.write(off_and_def.head(5))
 
 chart = alt.Chart(off_and_def).mark_circle().encode(x='AST_pct', y='fg_DR_pct', color='Pos_x', text='Player', tooltip=['Player'])
 st.write('A scatter plot of the joined and filtered data. Hover over a dot to see who it is.')
 st.altair_chart(chart)
 
-st.write('Now I will perform K Means Clustering with two clusters.')
+st.write('Now I will perform K Means Clustering with two clusters and add the cluster each player is assigned to the data')
 kmeans = KMeans(n_clusters=2, random_state=32).fit(off_and_def[['AST_pct', 'fg_DR_pct']])
 clusters = kmeans.predict(off_and_def[['AST_pct', 'fg_DR_pct']])
 off_and_def['cluster'] = clusters
 
 st.write(off_and_def.head(3))
+
+st.write("As you can see, two natural clusters emerged representing the different play styles. Cluster 0 contains almost entirely bigs while Cluster 1 contains almost entirely points despite the fact that I gave the model no information about position")
 
 chart2 = alt.Chart(off_and_def).mark_point().encode(
     x = 'AST_pct', 
@@ -66,7 +82,6 @@ chart2 = alt.Chart(off_and_def).mark_point().encode(
 
 st.altair_chart(chart2)
 
-st.write("As you can see, two natural clusters emerged representing the different play styles. Cluster 0 contains almost entirely bigs while Cluster 1 contains almost entirely points")
 
 st.write("Type in any player to see which cluster they are in: ")
 
@@ -78,6 +93,8 @@ st.write(off_and_def[(off_and_def.Pos_x=='Big') & (off_and_def.cluster==1)])
 st.write("These are the points that got grouped with the bigs:")
 st.write(off_and_def[(off_and_def.Pos_x=='Point') & (off_and_def.cluster==0)])
 st.write("Pat Bev is a good rebounder. How is Collin Sexton's Assist Percentage this low? Who is Frank Jackson?")
+
+'## K-means clustering with more features and four groups'
 
 st.write("Now I am going to include a more comprehensive set of player attributes and see what clusters emerge")
 
@@ -99,8 +116,8 @@ kmeans_data = kmeans_data.merge(foul_drawing[['Player', 'Team', 'FT_pct', 'SF_pc
 kmeans_data = kmeans_data.merge(shot_types[['Player', 'Team', 'Rim', 'All_mid', 'All_three']], on=['Player', 'Team'])
 kmeans_data = kmeans_data[kmeans_data['Min']>400]
 
-st.write("Here is all the joined data/metrics I plan to use as a input. It only contains players who have played more than 400 minutes this season.")
-kmeans_data
+st.write("Here is all the joined data/metrics I plan to use as input. It only contains players who have played more than 400 minutes this season.")
+st.write("I am also only using statistics that quantify HOW a player plays, not HOW MUCH they play. I am looking for playing styles. For example I'm using usage rate instead of shots per game.")
 
 training_values = kmeans_data.drop(['Player', 'Team', 'Pos', 'Min'], axis=1)
 min_max_scaler = preprocessing.MinMaxScaler()
@@ -110,37 +127,39 @@ kmeans = KMeans(n_clusters=4, random_state=32).fit(scaled_values)
 clusters = kmeans.predict(scaled_values)
 kmeans_data['clusters'] = clusters
 
-st.write("I decided to test out 4 clusters. 4 Natural groups emerged. Here are their average metrics by group:")
+st.write("4 Natural groups emerged. Here are their average metrics by group:")
 st.write(kmeans_data.groupby('clusters').mean())
 'How many players are in each group?'
 kmeans_data.groupby('clusters').count()['Player']
 
-'### Cluster 0 - Traditional Bigs'
-'Cluster 0 has the highest Points Per Shot Attempt, Defensive Field Goal Rebounding %, and takes most of their shots near the rim. These are the old school big men'
+'### Cluster 0 - Well Rounded Role Players'
+'Cluster 0 has the lowest points per shot attempt, but does not lead or come in last in any other category. This group is better at rebounding than the three point shooting role players while being less efficient offensively'
 kmeans_data[kmeans_data.clusters == 0][['Player', 'Team', 'Pos']]
 st.write(kmeans_data[kmeans_data.clusters == 0].groupby('Pos').count()['Player'])
-'Every Single Member of Cluster 0 is a big except Ben Simmons!'
 
-'### Cluster 1 - Three Point Shooting Role Players'
-'Cluster 1 takes more than half of their shots from three. This is the only category they lead. They are last in usage, but second in points per shot attempt.'
+'### Cluster 1 - Three Point Shooting Specialist Role Players'
+'Cluster 1 takes more than half of their shots from three and the lowest percent from mid range. This is the only category they lead. They are last in usage, but second in points per shot attempt.'
 kmeans_data[kmeans_data.clusters == 1][['Player', 'Team', 'Pos']]
 st.write(kmeans_data[kmeans_data.clusters == 1].groupby('Pos').count()['Player'])
 
-'### Cluster 2 - Offensive focal points'
-'Cluster 2 has the highest usage rate, highest assist rate, highest free throw percentage, and takes a balance of shots at the rim, mid, and three point ranges'
+'### Cluster 2 - Traditional Bigs'
+'Cluster 2 has the highest Points Per Shot Attempt, Defensive Field Goal Rebounding %, and takes most of their shots near the rim. These are the old school big men'
 kmeans_data[kmeans_data.clusters == 2][['Player', 'Team', 'Pos']]
 st.write(kmeans_data[kmeans_data.clusters == 2].groupby('Pos').count()['Player'])
-'Nikola Jokic is the only big in this category'
-'### Cluster 3 - Well Rounded Role Players'
-'Cluster 3 has the lowest points per shot attempt, but does not lead or come in last in any other category. This group is better at rebounding than the three point shooting role players while being less efficient offensively'
+'Every Single Member of Cluster 0 is a big except Ben Simmons!'
+
+
+'### Cluster 3 - Offensive focal points'
+'Cluster 3 has the highest usage rate, highest assist rate, highest free throw percentage, and takes a balance of shots at the rim, mid, and three point ranges'
 kmeans_data[kmeans_data.clusters == 3][['Player', 'Team', 'Pos']]
-st.write(kmeans_data[kmeans_data.clusters == 2].groupby('Pos').count()['Player'])
+st.write(kmeans_data[kmeans_data.clusters == 3].groupby('Pos').count()['Player'])
+'Nikola Jokic is the only big in this category'
 
 '### Observations'
 
 'It is interesting to me that the group with the lowest usage rate (1), took the most threes. In the modern NBA, so many players have a permission slip the let the three fly.'
 'The Traditional Bigs Cluster has the least amount of players by far. This dwindling group of non-three-shooting bigs has managed to avoid extinction with insanely good points per shot attempt'
-'The Ben Simmons shot profile looks like that of a mid-90s center, not a modern guard'
+'The Ben Simmons shot profile looks like that of a mid-90s center, not a modern guard.'
 
 '## Same Analysis - Different Era'
 
@@ -181,8 +200,11 @@ kmeans_data03['clusters'] = clusters03
 
 st.write(kmeans_data03.groupby('clusters').mean())
 'The clusters have very different looks to them'
-'### Cluster 0 Offensively Skilled Role Players'
-'Cluster 0 has the second highest usage and assist percentages, and the highest percentage of three point shots taken. It boasts the most points per shot attempt.'
+
+'### Cluster 0 - Bigs who love the mid-range'
+'Cluster 0 has the second highest rebounding numbers, barely shoots any threes, and shoots more midranges than any group from either era.'
+'Close your eyes and picture Kevin Garnett pulling up from the elbow - that is this group'
+'Most of these guys would be shooting threes as stretch fours or fives in todays game'
 st.write(kmeans_data03[kmeans_data03.clusters==0])
 st.write(kmeans_data03[kmeans_data03.clusters==0].groupby('Pos').count()['Player'])
 
@@ -191,34 +213,16 @@ st.write(kmeans_data03[kmeans_data03.clusters==0].groupby('Pos').count()['Player
 st.write(kmeans_data03[kmeans_data03.clusters==1])
 st.write(kmeans_data03[kmeans_data03.clusters==1].groupby('Pos').count()['Player'])
 
-'### Cluster 2 - Bigs who love the mid-range'
-'Cluster 2 has the second highest rebounding numbers, barely shoots any threes, and shoots more midranges than any group from either era.'
-'Close your eyes and picture Kevin Garnett pulling up from the elbow - that is this group'
-'Most of these guys would be shooting threes as stretch fours or fives in todays game'
+
+'### Cluster 2 - Old school bigs'
+'Cluster 2 rarely assists and virtually never shoots threes. More than half their shots are from the inside.'
 st.write(kmeans_data03[kmeans_data03.clusters==2])
 st.write(kmeans_data03[kmeans_data03.clusters==2].groupby('Pos').count()['Player'])
 
-'### Cluster 3 - Old school bigs'
-'Cluster 3 rarely assists and virtually never shoots threes'
+'### Cluster 3 - Skilled Role Players'
+'This is the most efficient group in terms of points per shot attempt. They shoot the most threes in this era.'
 st.write(kmeans_data03[kmeans_data03.clusters==3])
 st.write(kmeans_data03[kmeans_data03.clusters==3].groupby('Pos').count()['Player'])
-
-kmeans_data['cluster_name'] = 'placeholder'
-kmeans_data.loc[kmeans_data.clusters==0, 'cluster_name'] = "Traditional Bigs"
-kmeans_data.loc[kmeans_data.clusters==1, 'cluster_name'] = "3 pt role players"
-kmeans_data.loc[kmeans_data.clusters==2, 'cluster_name'] = "Offensive Focal Points"
-kmeans_data.loc[kmeans_data.clusters==3, 'cluster_name'] = "Balanced Role Players"
-
-kmeans_data03.loc[kmeans_data03.clusters==0, 'cluster_name'] = "Skilled Role Players"
-kmeans_data03.loc[kmeans_data03.clusters==1, 'cluster_name'] = "Offensive Focal Points"
-kmeans_data03.loc[kmeans_data03.clusters==2, 'cluster_name'] = "Mid Range Bigs"
-kmeans_data03.loc[kmeans_data03.clusters==3, 'cluster_name'] = "Old School Bigs"
-
-'A comparison of the groups right next to each other'
-'Modern NBA:'
-st.write(kmeans_data.groupby('cluster_name').mean())
-'2003-2004:'
-st.write(kmeans_data03.groupby('cluster_name').mean())
 
 'In 2003-2004, only one cluster took more than thirty percent of their shots from three. All except the traditional bigs took more than 30 percent of their shots from three in the modern NBAs' 
 'The highest percentage of shots from mid-range in the modern NBA, is roughly equal to the lowest percentage of shots from mid range in 03-04'
