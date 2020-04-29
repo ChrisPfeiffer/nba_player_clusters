@@ -162,8 +162,8 @@ st.write(kmeans_data[kmeans_data.clusters == cluster_rim].groupby('Pos').count()
 
 '### Offensive focal points'
 'Cluster 3 has the highest usage rate, highest assist rate, highest free throw percentage, and takes a balance of shots at the rim, mid, and three point ranges'
-kmeans_data[kmeans_data.clusters == cluster_3pt][['Player', 'Team', 'Pos']]
-st.write(kmeans_data[kmeans_data.clusters == cluster_3pt].groupby('Pos').count()['Player'])
+kmeans_data[kmeans_data.clusters == cluster_focals][['Player', 'Team', 'Pos']]
+st.write(kmeans_data[kmeans_data.clusters == cluster_focals].groupby('Pos').count()['Player'])
 'Nikola Jokic is the only big in this category'
 
 '### Observations'
@@ -209,31 +209,41 @@ kmeans_data03['clusters'] = clusters03
 'Note: Cleaning the glass did not have Shooting foul percent so I removed that from 03-04 clusters'
 'The four clusters from the 03-04 season:'
 
-st.write(kmeans_data03.groupby('clusters').mean())
+averages03 = kmeans_data03.groupby('clusters').mean().sort_values('Usage')
+averages03
+averages03['cluster_name'] = ['1', '2', '3', '4']
+averages03.loc[averages03.All_mid > 60, 'cluster_name'] = "Mid Range Bigs"
+cluster_mrb = averages03[averages03.All_mid >60].index.values[0]
+averages03.loc[averages03.Usage > 21, 'cluster_name'] = "Offensive Focal Points"
+cluster_focals = averages03[averages03.Usage > 21].index.values[0]
+averages03.loc[averages03.Rim > 55, 'cluster_name'] = "Old School Bigs"
+cluster_bigs = averages03[averages03.Rim > 55].index.values[0]
+averages03.loc[averages03.All_three > 30, 'cluster_name'] = "Skilled Role Players"
+cluster_skilled = averages03[averages03.All_three > 30].index.values[0]
 'The clusters have very different looks to them'
 
 '### Cluster 0 - Bigs who love the mid-range'
 'Cluster 0 has the second highest rebounding numbers, barely shoots any threes, and shoots more midranges than any group from either era.'
 'Close your eyes and picture Kevin Garnett pulling up from the elbow - that is this group'
 'Most of these guys would be shooting threes as stretch fours or fives in todays game'
-st.write(kmeans_data03[kmeans_data03.clusters==0])
-st.write(kmeans_data03[kmeans_data03.clusters==0].groupby('Pos').count()['Player'])
+st.write(kmeans_data03[kmeans_data03.clusters==cluster_mrb])
+st.write(kmeans_data03[kmeans_data03.clusters==cluster_mrb].groupby('Pos').count()['Player'])
 
 '### Cluster 1 - Offensive focal points'
 'Cluster 1 has the highest Usage and Ast pct and shoots half their shots from mid range'
-st.write(kmeans_data03[kmeans_data03.clusters==1])
-st.write(kmeans_data03[kmeans_data03.clusters==1].groupby('Pos').count()['Player'])
+st.write(kmeans_data03[kmeans_data03.clusters==cluster_focals])
+st.write(kmeans_data03[kmeans_data03.clusters==cluster_focals].groupby('Pos').count()['Player'])
 
 
 '### Cluster 2 - Old school bigs'
 'Cluster 2 rarely assists and virtually never shoots threes. More than half their shots are from the inside.'
-st.write(kmeans_data03[kmeans_data03.clusters==2])
-st.write(kmeans_data03[kmeans_data03.clusters==2].groupby('Pos').count()['Player'])
+st.write(kmeans_data03[kmeans_data03.clusters==cluster_bigs])
+st.write(kmeans_data03[kmeans_data03.clusters==cluster_bigs].groupby('Pos').count()['Player'])
 
 '### Cluster 3 - Skilled Role Players'
 'This is the most efficient group in terms of points per shot attempt. They shoot the most threes in this era.'
-st.write(kmeans_data03[kmeans_data03.clusters==3])
-st.write(kmeans_data03[kmeans_data03.clusters==3].groupby('Pos').count()['Player'])
+st.write(kmeans_data03[kmeans_data03.clusters==cluster_skilled])
+st.write(kmeans_data03[kmeans_data03.clusters==cluster_skilled].groupby('Pos').count()['Player'])
 
 'In 2003-2004, only one cluster took more than thirty percent of their shots from three. All except the traditional bigs took more than 30 percent of their shots from three in the modern NBAs' 
 'The highest percentage of shots from mid-range in the modern NBA, is roughly equal to the lowest percentage of shots from mid range in 03-04'
