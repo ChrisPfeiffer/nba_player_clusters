@@ -128,31 +128,42 @@ clusters = kmeans.predict(scaled_values)
 kmeans_data['clusters'] = clusters
 
 st.write("4 Natural groups emerged. Here are their average metrics by group:")
-st.write(kmeans_data.groupby('clusters').mean())
-'How many players are in each group?'
-kmeans_data.groupby('clusters').count()['Player']
+averages = kmeans_data.groupby('clusters').mean().sort_values('Usage')
+averages['cluster_name'] = ['1', '2', '3', '4']
+averages.loc[averages.PSA < 110, 'cluster_name'] = "Well Rounded Role Players"
+cluster_wrrp = averages[averages.PSA <110].index.values[0]
+averages.loc[averages.All_three > 55, 'cluster_name'] = "3pt Role Players"
+cluster_3pt = averages[averages.All_three > 55].index.values[0]
+averages.loc[averages.Rim > 60, 'cluster_name'] = "Traditional Bigs"
+cluster_rim = averages[averages.Rim > 60].index.values[0]
+averages.loc[averages.Usage > 25, 'cluster_name'] = "Offensive Focal Points"
+cluster_focals = averages[averages.Usage > 25].index.values[0]
+averages
 
-'### Cluster 0 - Well Rounded Role Players'
-'Cluster 0 has the lowest points per shot attempt, but does not lead or come in last in any other category. This group is better at rebounding than the three point shooting role players while being less efficient offensively'
-kmeans_data[kmeans_data.clusters == 0][['Player', 'Team', 'Pos']]
-st.write(kmeans_data[kmeans_data.clusters == 0].groupby('Pos').count()['Player'])
+'### Well Rounded Role Players'
+averages[averages.PSA < 110]
+'This cluster has the lowest points per shot attempt, but does not lead or come in last in any other category. This group is better at rebounding than the three point shooting role players while being less efficient offensively'
+kmeans_data[kmeans_data.clusters == cluster_wrrp][['Player', 'Team', 'Pos']]
+st.write(kmeans_data[kmeans_data.clusters == cluster_wrrp].groupby('Pos').count()['Player'])
 
-'### Cluster 1 - Three Point Shooting Specialist Role Players'
-'Cluster 1 takes more than half of their shots from three and the lowest percent from mid range. This is the only category they lead. They are last in usage, but second in points per shot attempt.'
-kmeans_data[kmeans_data.clusters == 1][['Player', 'Team', 'Pos']]
-st.write(kmeans_data[kmeans_data.clusters == 1].groupby('Pos').count()['Player'])
+'### Three Point Shooting Specialist Role Players'
+averages[averages.All_three > 55]
+'This Cluster takes more than half of their shots from three and the lowest percent from mid range. This is the only category they lead. They are last in usage, but second in points per shot attempt.'
+kmeans_data[kmeans_data.clusters == cluster_3pt][['Player', 'Team', 'Pos']]
+st.write(kmeans_data[kmeans_data.clusters == cluster_3pt].groupby('Pos').count()['Player'])
 
-'### Cluster 2 - Traditional Bigs'
-'Cluster 2 has the highest Points Per Shot Attempt, Defensive Field Goal Rebounding %, and takes most of their shots near the rim. These are the old school big men'
-kmeans_data[kmeans_data.clusters == 2][['Player', 'Team', 'Pos']]
-st.write(kmeans_data[kmeans_data.clusters == 2].groupby('Pos').count()['Player'])
+'### Traditional Bigs'
+averages[averages.Rim > 60]
+'This cluster has the highest Points Per Shot Attempt, Defensive Field Goal Rebounding %, and takes most of their shots near the rim. These are the old school big men'
+kmeans_data[kmeans_data.clusters == cluster_rim][['Player', 'Team', 'Pos']]
+st.write(kmeans_data[kmeans_data.clusters == cluster_rim].groupby('Pos').count()['Player'])
 'Every Single Member of Cluster 0 is a big except Ben Simmons!'
 
 
-'### Cluster 3 - Offensive focal points'
+'### Offensive focal points'
 'Cluster 3 has the highest usage rate, highest assist rate, highest free throw percentage, and takes a balance of shots at the rim, mid, and three point ranges'
-kmeans_data[kmeans_data.clusters == 3][['Player', 'Team', 'Pos']]
-st.write(kmeans_data[kmeans_data.clusters == 3].groupby('Pos').count()['Player'])
+kmeans_data[kmeans_data.clusters == cluster_3pt][['Player', 'Team', 'Pos']]
+st.write(kmeans_data[kmeans_data.clusters == cluster_3pt].groupby('Pos').count()['Player'])
 'Nikola Jokic is the only big in this category'
 
 '### Observations'
